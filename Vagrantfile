@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--memory", "768"]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     override.vm.box = "opscode-precise-vbox"
-    override.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04-i386_provisionerless.box"
+    override.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-12.04_chef-provisionerless.box"
   end
 
   config.vm.provider :lxc do |lxc, override|
@@ -21,18 +21,11 @@ Vagrant.configure("2") do |config|
   end
 
   config.berkshelf.enabled = true
-  config.omnibus.chef_version = :latest
-  #config.cache.auto_detect = true
+  config.omnibus.chef_version = "11.6.2"
+  config.cache.enable :apt
 
   config.vm.provision :chef_solo do |chef|
     chef.json = {
-      :redmine_default => {
-        :database => {
-          :name => 'redmine_default',
-          :username => 'redmine_default',
-          :password => 'redmine_default'
-        }
-      },
       :mysql => {
         :server_root_password => "iloverandompasswordsbutthiswilldo",
         :server_repl_password => "iloverandompasswordsbutthiswilldo",
