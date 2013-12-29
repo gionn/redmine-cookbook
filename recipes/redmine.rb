@@ -4,7 +4,7 @@ package "imagemagick"
 package "libmagickcore-dev"
 package "libmagickwand-dev"
 
-node[:redmine_installs].each do |profile_name|
+node[:redmine][:profiles].each do |profile_name, parameters|
 
   redmine_destination = node[:redmine][:base_path] + "/" + profile_name
   group_name = 'www-data'
@@ -17,12 +17,6 @@ node[:redmine_installs].each do |profile_name|
     supports :manage_home => true
   end
 
-  #group "rbenv" do
-  #  action :modify
-  #  members profile_name
-  #  append true
-  #end
-
   ruby_version_file = redmine_destination + '/.ruby-version'
 
   file ruby_version_file do
@@ -30,13 +24,13 @@ node[:redmine_installs].each do |profile_name|
     group group_name
     mode  '0644'
     action :create
-    content "#{node[:redmine][:ruby_version]}\n"
+    content "#{parameters[:ruby_version]}\n"
   end
 
   application profile_name do
     path redmine_destination
     repository 'https://github.com/redmine/redmine.git'
-    revision   node[:redmine][:version]
+    revision parameters[:redmine_version]
     symlink_before_migrate({
       "database.yml" => "config/database.yml",
       "files" => "files"
@@ -52,10 +46,10 @@ node[:redmine_installs].each do |profile_name|
     action :create
     content "production:\n" +
             "  adapter: mysql2\n" +
-            "  database: #{node[profile_name][:database][:name]}\n" +
+            "  database: #{parameters[:database][:dbname]}\n" +
             "  host: localhost\n" +
-            "  username: #{node[profile_name][:database][:username]}\n" +
-            "  password: #{node[profile_name][:database][:password]}\n"
+            "  username: #{parameters[:database][:username]}\n" +
+            "  password: #{parameters[:database][:password]}\n"
   end
 
   directory redmine_destination + '/shared/files' do
@@ -88,7 +82,7 @@ node[:redmine_installs].each do |profile_name|
       command commandLine
       cwd redmine_destination + '/current'
       path @rbenv_path
-      environment ( { "RBENV_ROOT" => "/opt/rbenv", "HOME" => '/opt/rbenv' } )
+      environment({ "RBENV_ROOT" => "/opt/rbenv", "HOME" => '/opt/rbenv'})
       user 'rbenv'
       group group_name
     end
@@ -106,7 +100,7 @@ node[:redmine_installs].each do |profile_name|
       command commandLine
       cwd redmine_destination + '/current'
       path @rbenv_path
-      environment ( { "RBENV_ROOT" => "/opt/rbenv", "HOME" => redmine_destination, "RAILS_ENV" => 'production' } )
+      environment({ "RBENV_ROOT" => "/opt/rbenv", "HOME" => redmine_destination, "RAILS_ENV" => 'production' })
       user profile_name
       group group_name
     end
@@ -114,14 +108,10 @@ node[:redmine_installs].each do |profile_name|
   end
 
   template "/etc/init/#{profile_name}.conf" do
-    action    :create
     owner     'root'
     group     'root'
     source    'upstart.conf.erb'
-    variables ({
-      'profile_name' => profile_name,
-      'home' => redmine_destination
-    })
+    variables({ 'profile_name' => profile_name, 'home' => redmine_destination })
   end
 
   service profile_name do
@@ -130,3 +120,4 @@ node[:redmine_installs].each do |profile_name|
   end
 
 end
+

@@ -12,21 +12,21 @@ include_recipe "apt"
 include_recipe "mysql::server"
 include_recipe "mysql::ruby"
 
-node[:redmine_installs].each do |profile_name|
+node[:redmine][:profiles].each do |profile_name, parameters|
 
-    mysql_database node[profile_name][:database][:name] do
+    mysql_database parameters[:database][:dbname] do
       connection mysql_connection_info
       action :create
     end
 
     unless Chef::Config[:solo]
-        set_unless[profile_name][:database][:password] = secure_password
+        set_unless[:redmine_profiles][profile_name][:database][:password] = secure_password
     end
 
-    mysql_database_user node[profile_name][:database][:username] do
+    mysql_database_user parameters[:database][:username] do
       connection mysql_connection_info
-      password node[profile_name][:database][:password]
-      database_name node[profile_name][:database][:name]
+      password parameters[:database][:password]
+      database_name parameters[:database][:dbname]
       privileges [:all]
       action [:create, :grant]
     end

@@ -15,4 +15,17 @@ apt_repository "cd-ruby" do
 end
 
 package 'cd-rbenv'
-package "cd-ruby-#{node[:redmine][:ruby_version]}"
+
+node[:redmine][:profiles].each do |profile_name, parameters|
+    package "cd-ruby-#{parameters[:ruby_version]}"
+end
+
+ruby_version_file = '/home/.ruby-version'
+
+file ruby_version_file do
+    owner 'root'
+    group 'root'
+    mode  '0644'
+    action :create
+    content "#{node[:redmine][:ruby_version]}\n"
+end
