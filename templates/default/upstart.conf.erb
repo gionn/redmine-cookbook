@@ -13,5 +13,5 @@ env RAILS_ENV=production
 
 script
     chdir <%= @home %>/current
-    /opt/rbenv/bin/rbenv exec unicorn >> $HOME/app.log 2>&1
+    /opt/rbenv/bin/rbenv exec unicorn -c ../../app.rb >> $HOME/app.log 2>&1
 end script
