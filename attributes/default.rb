@@ -8,6 +8,11 @@ default[:redmine][:profiles] = {
             :username => "redmine_default",
             :password => "redmine_default",
             :dbname => "redmine_default"
+        },
+        :unicorn => {
+            :listen => 'localhost:8080',
+            :workers => 2,
+            :preload => true
         }
     }
 }

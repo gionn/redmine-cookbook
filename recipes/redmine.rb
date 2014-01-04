@@ -107,6 +107,13 @@ node[:redmine][:profiles].each do |profile_name, parameters|
 
   end
 
+    template redmine_destination + '/app.rb' do
+        owner   profile_name
+        group   'rbenv'
+        source  'app.rb.erb'
+        variables({'params' => parameters[:unicorn]})
+    end
+
   template "/etc/init/#{profile_name}.conf" do
     owner     'root'
     group     'root'

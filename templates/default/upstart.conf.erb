@@ -5,7 +5,7 @@ version     "1.0"
 start on started mountall
 stop on shutdown
 respawn
-respawn limit 99 5
+respawn limit 10 5
 
 env HOME=<%= @home %>
 env RBENV_ROOT="/opt/rbenv"
