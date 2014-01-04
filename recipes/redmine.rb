@@ -100,10 +100,15 @@ node[:redmine][:profiles].each do |profile_name, parameters|
 
     end
 
-    commands = [
-        "/opt/rbenv/bin/rbenv exec rake generate_secret_token",
-        "/opt/rbenv/bin/rbenv exec rake db:migrate"
-    ]
+    commands = Array.new
+
+    if parameters[:redmine_version] =~ /$2\./
+        commands.push "/opt/rbenv/bin/rbenv exec rake generate_secret_token"
+    else
+        commands.push "/opt/rbenv/bin/rbenv exec rake generate_session_store"
+    end
+
+    commands.push "/opt/rbenv/bin/rbenv exec rake db:migrate"
 
     commands.each do |commandLine|
 
