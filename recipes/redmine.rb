@@ -71,9 +71,9 @@ node[:redmine][:profiles].each do |profile_name, parameters|
   .split(':')
 
   commands = [
-    "/opt/rbenv/bin/rbenv exec gem install bundler",
+    "/opt/rbenv/bin/rbenv exec gem install bundler --conservative",
     "/opt/rbenv/bin/rbenv exec bundle install --without development test",
-    "/opt/rbenv/bin/rbenv exec gem install unicorn"
+    "/opt/rbenv/bin/rbenv exec gem install unicorn --conservative"
   ]
 
   commands.each do |commandLine|
