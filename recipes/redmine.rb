@@ -1,6 +1,9 @@
 include_recipe "apt"
 package "git"
 package "imagemagick"
+package "libmysqlclient-dev"
+package "libpq-dev"
+package "libsqlite3-dev"
 package "libmagickcore-dev"
 package "libmagickwand-dev"
 
