@@ -9,6 +9,11 @@ node[:redmine][:profiles].each do |profile_name, parameters|
     redmine_destination = node[:redmine][:base_path] + "/" + profile_name
     group_name = 'www-data'
 
+    service profile_name do
+        provider Chef::Provider::Service::Upstart
+        action :nothing
+    end
+
     user profile_name do
         home redmine_destination
         system true
@@ -25,6 +30,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         mode  '0644'
         action :create
         content "#{parameters[:ruby_version]}\n"
+        notifies :restart, resources(:service => profile_name)
     end
 
     application profile_name do
@@ -37,6 +43,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         })
         owner profile_name
         group group_name
+        notifies :restart, resources(:service => profile_name)
     end
 
     file redmine_destination + "/shared/database.yml" do
@@ -50,6 +57,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         "  host: localhost\n" +
             "  username: #{parameters[:database][:username]}\n" +
         "  password: #{parameters[:database][:password]}\n"
+        notifies :restart, resources(:service => profile_name)
     end
 
     directory redmine_destination + '/shared/files' do
@@ -112,6 +120,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         group   'rbenv'
         source  'app.rb.erb'
         variables({'params' => parameters[:unicorn]})
+        notifies :restart, resources(:service => profile_name)
     end
 
     template "/etc/init/#{profile_name}.conf" do
@@ -119,11 +128,11 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         group     'root'
         source    'upstart.conf.erb'
         variables({ 'profile_name' => profile_name, 'home' => redmine_destination })
+        notifies :restart, resources(:service => profile_name)
     end
 
     service profile_name do
         provider Chef::Provider::Service::Upstart
         action :start
     end
-
 end
