@@ -1,4 +1,3 @@
-
 default[:redmine][:profiles] = {
     'redmine_default' => {
         :redmine_version => "2.4.2",
@@ -23,4 +22,3 @@ default[:redmine][:base_path] = "/home"
 
 override['mysql']['remove_anonymous_users'] = true
 override['mysql']['remove_test_database'] = true
-
