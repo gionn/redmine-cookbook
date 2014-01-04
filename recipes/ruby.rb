@@ -16,7 +16,7 @@ end
 
 package 'cd-rbenv'
 
-node[:redmine][:profiles].each do |profile_name, parameters|
+node['redmine']['profiles'].each do |profile_name, parameters|
     package "cd-ruby-#{parameters[:ruby_version]}"
 end
 
@@ -27,5 +27,5 @@ file ruby_version_file do
     group 'root'
     mode  '0644'
     action :create
-    content "#{node[:redmine][:ruby_version]}\n"
+    content "#{node['redmine']['ruby_version']}\n"
 end

@@ -7,9 +7,9 @@ package "libsqlite3-dev"
 package "libmagickcore-dev"
 package "libmagickwand-dev"
 
-node[:redmine][:profiles].each do |profile_name, parameters|
+node['redmine']['profiles'].each do |profile_name, parameters|
 
-    redmine_destination = node[:redmine][:base_path] + "/" + profile_name
+    redmine_destination = node['redmine']['base_path'] + "/" + profile_name
     group_name = 'www-data'
 
     service profile_name do
@@ -33,7 +33,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         mode  '0644'
         action :create
         content "#{parameters[:ruby_version]}\n"
-        notifies :restart, resources(:service => profile_name)
+        notifies :restart, "service[#{profile_name}]"
     end
 
     application profile_name do
@@ -46,7 +46,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         })
         owner profile_name
         group group_name
-        notifies :restart, resources(:service => profile_name)
+        notifies :restart, "service[#{profile_name}]"
     end
 
     file redmine_destination + "/shared/database.yml" do
@@ -57,10 +57,10 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         content "production:\n" +
             "  adapter: mysql2\n" +
             "  database: #{parameters[:database][:dbname]}\n" +
-        "  host: localhost\n" +
+            "  host: localhost\n" +
             "  username: #{parameters[:database][:username]}\n" +
-        "  password: #{parameters[:database][:password]}\n"
-        notifies :restart, resources(:service => profile_name)
+            "  password: #{parameters[:database][:password]}\n"
+        notifies :restart, "service[#{profile_name}]"
     end
 
     directory redmine_destination + '/shared/files' do
@@ -128,7 +128,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         group   'rbenv'
         source  'app.rb.erb'
         variables({'params' => parameters[:unicorn]})
-        notifies :restart, resources(:service => profile_name)
+        notifies :restart, "service[#{profile_name}]"
     end
 
     template "/etc/init/#{profile_name}.conf" do
@@ -136,7 +136,7 @@ node[:redmine][:profiles].each do |profile_name, parameters|
         group     'root'
         source    'upstart.conf.erb'
         variables({ 'profile_name' => profile_name, 'home' => redmine_destination })
-        notifies :restart, resources(:service => profile_name)
+        notifies :restart, "service[#{profile_name}]"
     end
 
     service profile_name do
