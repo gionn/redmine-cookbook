@@ -1,68 +1,74 @@
-redmine-gunicorn Cookbook
-=========================
-TODO: Enter the cookbook description here.
+Redmine Chef cookbook for massive hosting
+=========================================
+[![Build Status](https://travis-ci.org/gionn/redmine-cookbook.png?branch=master)](https://travis-ci.org/gionn/redmine-cookbook)
 
-e.g.
-This cookbook makes your favorite breakfast sandwich.
-
-Requirements
-------------
-TODO: List your cookbook requirements. Be sure to include any requirements this cookbook has on platforms, libraries, other cookbooks, packages, operating systems, etc.
-
-e.g.
-#### packages
-- `toaster` - redmine-gunicorn needs toaster to brown your bagel.
+It can be used to deploy multiple versions of redmine, each one with its own dedicated system user, served by unicorn instances.
 
 Attributes
 ----------
-TODO: List you cookbook attributes here.
 
-e.g.
-#### redmine-gunicorn::default
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Description</th>
-    <th>Default</th>
-  </tr>
-  <tr>
-    <td><tt>['redmine-gunicorn']['bacon']</tt></td>
-    <td>Boolean</td>
-    <td>whether to include bacon</td>
-    <td><tt>true</tt></td>
-  </tr>
-</table>
+```
+node['redmine']['version'] = "2.4.2"
+node['redmine']['ruby_version'] = "2.0.0-p247"
+node['redmine']['base_path'] = "/home"
+```
 
 Usage
 -----
-#### redmine-gunicorn::default
-TODO: Write usage instructions for each cookbook.
+Declare your desired redmines to be installed under profiles, and use the proposed runlist:
 
-e.g.
-Just include `redmine-gunicorn` in your node's `run_list`:
+```ruby
+chef.json = {
+    :mysql => {
+        :server_root_password => "iloverandompasswordsbutthiswilldo",
+        :server_repl_password => "iloverandompasswordsbutthiswilldo",
+        :server_debian_password => "iloverandompasswordsbutthiswilldo"
+    },
+    :redmine => {
+        :profiles => {
+            'redmine_default' => {
+                :redmine_version => "2.4.2",
+                :ruby_version => "2.0.0-p247",
+                :database => {
+                    :type => "mysql",
+                    :username => "redmine_default",
+                    :password => "redmine_default",
+                    :dbname => "redmine_default"
+                },
+                :unicorn => {
+                    :listen => 'localhost:8080',
+                    :workers => 2,
+                    :preload => true
+                }
 
-```json
-{
-  "name":"my_node",
-  "run_list": [
-    "recipe[redmine-gunicorn]"
-  ]
+            },
+            'redmine_secondary' => {
+                :redmine_version => "1.4.2",
+                :ruby_version => "1.9.3-p484",
+                :database => {
+                    :type => "mysql",
+                    :username => "redmine_sec",
+                    :password => "redmine_lka123sdkasd",
+                    :dbname => "redmine_secondary"
+                },
+                :unicorn => {
+                    :listen => 'localhost:8081',
+                    :workers => 2,
+                    :preload => true
+                }
+            }
+        }
+    }
 }
+
+chef.run_list = [
+    "recipe[redmine::mysql]",
+    "recipe[redmine::ruby]",
+    "recipe[redmine::redmine]"
+]
+
 ```
-
-Contributing
-------------
-TODO: (optional) If this is a public cookbook, detail the process for contributing. If this is a private cookbook, remove this section.
-
-e.g.
-1. Fork the repository on Github
-2. Create a named feature branch (like `add_component_x`)
-3. Write your change
-4. Write tests for your change (if applicable)
-5. Run the tests, ensuring they all pass
-6. Submit a Pull Request using Github
 
 License and Authors
 -------------------
-Authors: TODO: List authors
+Authors: Giovanni Toraldo
