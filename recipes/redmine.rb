@@ -49,13 +49,25 @@ node['redmine']['profiles'].each do |profile_name, parameters|
         notifies :restart, "service[#{profile_name}]"
     end
 
+    adapter_type = nil
+    case parameters[:database][:type]
+    when 'mysql'
+        if parameters['ruby_version'] =~ /1\.9/
+            adapter_type = 'mysql2'
+        else
+            adapter_type = 'mysql'
+        end
+    when 'postgresql'
+        adapter_type = 'postgresql'
+    end
+
     file redmine_destination + "/shared/database.yml" do
         owner profile_name
         group group_name
         mode  "0644"
         action :create
         content "production:\n" +
-            "  adapter: mysql2\n" +
+            "  adapter: #{adapter_type}\n" +
             "  database: #{parameters[:database][:dbname]}\n" +
             "  host: localhost\n" +
             "  username: #{parameters[:database][:username]}\n" +
