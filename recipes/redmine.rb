@@ -49,6 +49,11 @@ node['redmine']['profiles'].each do |profile_name, parameters|
         notifies :restart, "service[#{profile_name}]"
     end
 
+    cookbook_file "config.ru" do
+      path redmine_destination + '/current/config.ru'
+      action :create_if_missing
+    end
+
     adapter_type = nil
     case parameters[:database][:type]
     when 'mysql'
