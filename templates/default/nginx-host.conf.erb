@@ -4,7 +4,7 @@ server {
 
     location / {
         root <%= @document_root %>;
-        try_files $uri $uri/ @unicorn;
+        try_files $uri @unicorn;
     }
 
     location @unicorn {
